@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.lanqiao.entity.studentMapper" >
+    <select id="queryForech" parameterType="list" resultType="student">
+    select id,name,age from person
+    <where>
+    <if test="list!=null and list.size>0">
+     <foreach collection="list" item="id" open=" and id in (  " close=")" separator=",">
+      #{id}
+     </foreach>
+    
+    </if>
+    </where>
+    </select>
+	<select id="queryStudentById" resultMap="studentByIdMapper"  parameterType="int">
+		select * from person where  id = #{id} 
+	</select>
+	<resultMap type="student" id="studentByIdMapper">
+	<id property="id" column="id"/>
+	<result property="name" column="name"/>
+	<result property="age" column="age"/>
+	<result property="sex" column="sex" javaType="boolean" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<select id="selectConver" resultMap="studentMapper">
+	select * from person where  id = #{id} 
+	</select>
+	<resultMap type="student" id="studentMapper">
+	<id property="id" column="id"/>
+	<result property="name" column="name"/>
+	<result property="age" column="age"/>
+	<result property="sex" column="sex" javaType="boolean" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<insert id="addStudent" parameterType="student" >
+	insert into person(id,name,age,sex) values(#{id},#{name},#{age},#{sex,javaType=boolean,jdbcType=INTEGER})
+	</insert>
+	<update id="updateStudent" parameterType="student">
+	  update person set name=#{name},age=#{age},sex=#{sex,javaType=boolean,jdbcType=INTEGER} where id=#{id}
+	
+	</update>
+	<delete id="deleteStudentById" parameterType="int">
+	delete from person where id=#{id};
+	
+	</delete>
+	<select id="queryAllstudent" resultMap="deleteMapper">
+	select * from person
+	</select>
+	<resultMap type="student" id="deleteMapper">
+	<id property="id" column="id"/>
+	<result property="name" column="name"/>
+	<result property="age" column="age"/>
+	<result property="sex" column="sex" javaType="boolean" jdbcType="INTEGER"/>
+	</resultMap>
+	<!--排序  -->
+	<select id="queryOrderClun" resultType="student" parameterType="string">
+	 select id,age,name from person order by ${value} desc
+	</select>
+	<!--通过学号和姓名查询  -->
+	<select id="queryIdorName" resultType="student" parameterType="student">
+	 select id,name,age from person where id=#{id} or name like '%${name}%'
+	</select>
+	<!--嵌套查询  -->
+	<select id="queryAdress" resultType="student" parameterType="student"  >
+	select id,name,age,homeadress,schooladress from person where homeadress=#{adress.homeadress}
+	</select>
+	<select id="callquery" parameterType="HashMap" statementType="CALLABLE" >
+	{CALL queryCountByGradeWithProcedure(#{gName,jdbcType=VARCHAR,mode=IN},#{scount,jdbcType=INTEGER,mode=OUT})}	
+	</select>
+	<!--一对一  -->
+	<select id="queryonetoone" parameterType="int" resultMap="one">
+	select s.*,c.* from dept s inner join emp c
+	where s.id=#{id}
+	</select>
+	<resultMap type="org.lanqiao.entity.Dept" id="one">
+     <id property="id" column="id"/>
+     <result property="name" column="name"/>
+     <result property="dept_id" column="dept_id"/>
+     <association property="emp" javaType="org.lanqiao.entity.Emp">
+     <id property="id" column="id"/>
+     <result property="names" column="names"/>
+     </association>
+	</resultMap>
+	<!--一对多  -->
+	<select id="queryonetomore" parameterType="int" resultMap="onetomore">
+    select c.* ,s.* from students c inner join class s on c.classid=s.classid
+    where c.classid=#{classid}
+	</select>
+	<resultMap type="org.lanqiao.entity.Class" id="onetomore">
+	<id property="classid" column="classid"/>
+	<result property="classname" column="classname"/>
+	<collection property="students" ofType="org.lanqiao.entity.Students">
+	<id property="id" column="id"/>
+	<result property="name" column="name"/> 
+	</collection>
+	</resultMap>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>
